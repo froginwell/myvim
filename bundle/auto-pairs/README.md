@@ -19,7 +19,7 @@ Features
 
 *   Delete in pair
 
-        input: foo[<BS>]
+        input: foo[<BS>
         output: foo
 
 *   Insert new indented line after Return
@@ -66,14 +66,6 @@ Features
 
         input: |[foo, bar()] (press (<M-e> at |)
         output: ([foo, bar()])
-
-*   Quick move char to closed pair
-
-        input: (|){["foo"]} (press <M-}> at |)
-        output: ({["foo"]}|)
-
-        input: |[foo, bar()] (press (<M-]> at |)
-        output: ([foo, bar()]|)
 
 *   Quick jump to closed pair.
 
@@ -167,7 +159,7 @@ Shortcuts
 
     If <M-p> <M-e> or <M-n> conflict with another keys or want to bind to another keys, add
 
-        let g:AutoPairsShortcutToggle = '<another key>'
+        let g:AutoPairShortcutToggle = '<another key>'
 
     to .vimrc, if the key is empty string '', then the shortcut will be disabled.
 
@@ -210,12 +202,6 @@ Options
         Map <BS> to delete brackets, quotes in pair
         execute 'inoremap <buffer> <silent> <BS> <C-R>=AutoPairsDelete()<CR>'
 
-*   g:AutoPairsMapCh
-
-        Default : 1
-
-        Map <C-h> to delete brackets, quotes in pair
-
 *   g:AutoPairsMapCR
 
         Default : 1
@@ -243,26 +229,11 @@ Options
         set it to 1 to enable FlyMode.
         see FlyMode section for details.
 
-*   g:AutoPairsMultilineClose
-
-        Default : 1
-
-        When you press the key for the closing pair (e.g. `)`) it jumps past it.
-        If set to 1, then it'll jump to the next line, if there is only whitespace.
-        If set to 0, then it'll only jump to a closing pair on the same line.
-
 *   g:AutoPairsShortcutBackInsert
 
         Default : <M-b>
 
         Work with FlyMode, insert the key at the Fly Mode jumped postion
-
-*   g:AutoPairsMoveCharacter
-
-        Default: "()[]{}\"'"
-
-        Map <M-(> <M-)> <M-[> <M-]> <M-{> <M-}> <M-"> <M-'> to
-        move character under the cursor to the pair.
 
 Buffer Level Pairs Setting
 --------------------------
@@ -293,20 +264,17 @@ TroubleShooting
 
     3. use DEL or <C-O>x to delete the character insert by plugin.
 
-* Swedish Character Conflict
-
-    Because AutoPairs uses Meta(Alt) key as shortcut, it is conflict with some Swedish character such as å.
-    To fix the issue, you need remap or disable the related shortcut.
 
 Known Issues
 -----------------------
+There are the issues I cannot fix.
+
 Breaks '.' - [issue #3](https://github.com/jiangmiao/auto-pairs/issues/3)
 
     Description: After entering insert mode and inputing `[hello` then leave insert
                  mode by `<ESC>`. press '.' will insert 'hello' instead of '[hello]'.
-    Reason: `[` actually equals `[]\<LEFT>` and \<LEFT> will break '.'.
-            After version 7.4.849, Vim implements new keyword <C-G>U to avoid the break
-    Solution: Update Vim to 7.4.849+
+    Reason: `[` actually equals `[]\<LEFT>` and \<LEFT> will break '.'
+    Solution: none
 
 Contributors
 ------------

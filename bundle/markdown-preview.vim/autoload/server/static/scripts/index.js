@@ -1,19 +1,49 @@
 (function(global) {
     var TOTOPHEIGHT = 100;
-    var mkdID, body, html, mkdContainer, options;
+    var mkdID, body, html, mkdContainer, options, isLoadMathJax;
 
     mkdID = window.location.pathname.split('/').slice(2);
     body = document.body;
     html = document.querySelector('html');
     mkdContainer = document.getElementById('js-markdown');
 
+
+    function updateTitle() {
+        var slash = getSlash();
+        var fileName = Base64.decode(location.search.slice(1)).split('&')[0].split(slash).pop();
+        var title = document.getElementsByTagName('title')[0];
+        title.innerHTML = fileName;
+    }
+
+    function fixAllImg(text) {
+        var match, reg = /<img[^>]+?(src=("|')([^\2]+?)\2)[^>]+?>/g;
+        while((match = reg.exec(text)) !== null) {
+            if(match && match.length === 4) {
+                text = text.replace(match[3], getAbsPath(location.search, match[3]));
+            }
+        }
+        return text;
+    }
+
+    function getSlash() {
+        var platform = navigator.platform;
+        var slash;
+        if(/^win.*/i.test(platform)) {
+            slash = '\\';
+        } else {
+            slash = '/';
+        }
+        return slash;
+    }
+
     function getAbsPath(base, path) {
-        var bases = Base64.decode(base.slice(1)).split('/')
-        var paths = path.split('/');
+        var slash = getSlash();
+        var bases = Base64.decode(base.slice(1)).split('&')[0].split(slash).slice(0, -1);
+        var paths = path.split(slash);
         if(/^https?:?/i.test(paths[0])) {
             return path;
-        } else if(!/(^\..*)|(^\.\..*)/i.test(paths[0])) {
-            return '/image?' + Base64.encode(path);
+        } else if(/^$|^[a-zA-Z]:.*$/.test(paths[0])) {
+            return '/DIYURL?' + Base64.encode(path);
         } else {
             for(var i = 0, len = paths.length; i < len; i++) {
                 if(paths[i] === '..') {
@@ -23,7 +53,21 @@
                 }
             }
         }
-        return '/image?' + Base64.encode(bases.join('/'));
+        return '/DIYURL?' + Base64.encode(bases.join(slash));
+    }
+
+    function loadMathJax() {
+        var h, s;
+        if (!isLoadMathJax) {
+            isLoadMathJax = true;
+            window.MATHJAX_PATH = Base64.decode(location.search.slice(1)).split('&')[1];
+            h = document.getElementsByTagName('head')[0];
+            s = document.createElement('script');
+            s.type = 'text/javascript';
+            s.async = true;
+            s.src = '/DIYURL/MathJax.js?' + Base64.encode(window.MATHJAX_PATH + 'MathJax.js') + '&config=TeX-AMS-MML_HTMLorMML';
+            h.appendChild(s);
+        }
     }
 
     options = (function() {
@@ -32,8 +76,29 @@
             aPoint = '<a style="position: relative;" href="#'+ rFlagSign +'" id="'+ rFlagSign +'"></a>',
             renderer = new marked.Renderer(),
             rImage = renderer.image,
-            rLink = renderer.link;
+            rLink = renderer.link,
+            displaymath = renderer.displaymath,
+            inlineMath = renderer.math;
 
+        renderer.displaymath = function(text) {
+            loadMathJax();
+            var result = '';
+            text = text.replace('>', 'style="visibility: hidden;">')
+            if (text.indexOf(flagSign) !== -1) {
+                text = text.replace(flagSign, '');
+                result = aPoint;
+            }
+            return result + displaymath(text);
+        };
+        renderer.math = function(text) {
+            loadMathJax();
+            var result = '';
+            if (text.indexOf(flagSign) !== -1) {
+                text = text.replace(flagSign, '');
+                result = aPoint;
+            }
+            return result + inlineMath(text);
+        };
         //do solve for the position sign
         renderer.heading = function(text, level, raw) {
             var result = '';
@@ -47,7 +112,7 @@
                 + level
                 + ' id="'
                 + this.options.headerPrefix
-                + raw.toLowerCase().replace(/[^\w]+/g, '-')
+                + raw.toLowerCase().replace(/[\s]+/g, '-')
                 + '">'
                 + text
                 + '</h'
@@ -63,11 +128,13 @@
                 if(line.indexOf(flagSign) !== -1) {
                     html[i] = line.replace(flagSign, '') + aPoint;
                 }
+                html[i] = fixAllImg(html[i]);
             }
             return html.join('\n');
         };
 
         renderer.listitem = function(text) {
+            text = fixAllImg(text);
             var checked = '<input type="checkbox" class="task-list-item" checked disabled>',
                 unChecked = '<input type="checkbox" class="task-list-item" disabled>',
                 reg = /^\[\s*[xX]\s*\]/,
@@ -90,7 +157,7 @@
         };
 
         renderer.paragraph = function(text) {
-            text = text.replace(flagSign, aPoint);
+            text = fixAllImg(text.replace(flagSign, aPoint));
             return '<p>' + text + '</p>\n';
         };
 
@@ -118,7 +185,6 @@
                 text = text.replace(flagSign, '');
                 result = aPoint;
             }
-            href = getAbsPath(location.search, href);
             return result + rImage.call(renderer, href, title, text);
         };
 
@@ -160,7 +226,8 @@
             code =  hljs.highlightAuto(code).value;
             return code.replace('code' + options.flagSign + 'code', options.aPoint);
         },
-        renderer: options.renderer
+        renderer: options.renderer,
+        breaks: true
     });
 
     function openConn() {
@@ -193,13 +260,16 @@
                 TweenLite.to(body, 0.4, {scrollTop: aPoint.offsetTop - TOTOPHEIGHT, ease:Power2.easeOut});
                 TweenLite.to(html, 0.4, {scrollTop: aPoint.offsetTop - TOTOPHEIGHT, ease:Power2.easeOut});
             }
+
+            window.MathJax && MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
         });
     }
 
     function winClose() {
-        window.close()
+        window.close();
     }
 
+    updateTitle();
     openConn();
 
 })(this);

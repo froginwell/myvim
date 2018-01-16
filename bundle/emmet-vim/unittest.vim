@@ -298,11 +298,11 @@ finish
         },
         {
           'query': "blockquote>b>i<<b",
-          'result': "<blockquote><b><i></i></b></blockquote>\n<b></b>\n",
+          'result': "<blockquote>\n\t<b><i></i></b>\n</blockquote>\n<b></b>\n",
         },
         {
           'query': "blockquote>b>i^^b",
-          'result': "<blockquote><b><i></i></b></blockquote>\n<b></b>\n",
+          'result': "<blockquote>\n\t<b><i></i></b>\n</blockquote>\n<b></b>\n",
         },
         {
           'query': "a[href=foo][class=bar]",
@@ -538,7 +538,7 @@ finish
         },
         {
           'query': "form.search-form._wide>input.-query-string+input:s.-btn_large|bem",
-          'result': "<form class=\"search-form search-form_wide\" action=\"\">\n\t<input class=\"search-form-query-string\" type=\"\">\n\t<input class=\"search-form-btn_large\" type=\"submit\" value=\"\">\n</form>\n",
+          'result': "<form class=\"search-form search-form_wide\" action=\"\">\n\t<input class=\"search-form__query-string\" type=\"\">\n\t<input class=\"search-form__btn search-form__btn_large\" type=\"submit\" value=\"\">\n</form>\n",
         },
         {
           'query': "form>fieldset>legend+(label>input[type=\"checkbox\"])*3",
@@ -556,6 +556,10 @@ finish
         {
           'query': "<div>\n\t<span$$$$\\<c-y>j$$$$/>\n</div>",
           'result': "<div>\n\t<span></span>\n</div>",
+        },
+        {
+          'query': "<div onclick=\"javascript:console.log(Date.now() % 1000 > 500)\">test$$$$\\<c-y>j$$$$/>\n</div>",
+          'result': "<div onclick=\"javascript:console.log(Date.now() % 1000 > 500)\" />",
         },
       ],
     },
@@ -697,7 +701,7 @@ finish
         },
         {
           'query': "{-bdrs20$$$$}",
-          'result': "{-webkit-border-radius: 20px;\n-moz-border-radius: 20px;\nborder-radius: 20px;}",
+          'result': "{-webkit-border-radius: 20px;\n-moz-border-radius: 20px;\n-o-border-radius: 20px;\n-ms-border-radius: 20px;\nborder-radius: 20px;}",
         },
         {
           'query': "{lg(top,#fff,#000)$$$$}",
@@ -985,7 +989,7 @@ finish
         },
         {
           'query': "{-bdrs20$$$$}",
-          'result': "{-webkit-border-radius: 20px;\n-moz-border-radius: 20px;\nborder-radius: 20px;}",
+          'result': "{-webkit-border-radius: 20px;\n-moz-border-radius: 20px;\n-o-border-radius: 20px;\n-ms-border-radius: 20px;\nborder-radius: 20px;}",
         },
         {
           'query': "{lg(top,#fff,#000)$$$$}",

@@ -1,8 +1,8 @@
 " Insert or delete brackets, parens, quotes in pairs.
 " Maintainer:	JiangMiao <jiangfriend@gmail.com>
 " Contributor: camthompson
-" Last Change:  2017-06-17
-" Version: 1.3.3
+" Last Change:  2013-07-13
+" Version: 1.3.2
 " Homepage: http://www.vim.org/scripts/script.php?script_id=3599
 " Repository: https://github.com/jiangmiao/auto-pairs
 " License: MIT
@@ -22,11 +22,6 @@ end
 
 if !exists('g:AutoPairsMapBS')
   let g:AutoPairsMapBS = 1
-end
-
-" Map <C-h> as the same BS
-if !exists('g:AutoPairsMapCh')
-  let g:AutoPairsMapCh = 1
 end
 
 if !exists('g:AutoPairsMapCR')
@@ -49,10 +44,6 @@ if !exists('g:AutoPairsShortcutFastWrap')
   let g:AutoPairsShortcutFastWrap = '<M-e>'
 end
 
-if !exists('g:AutoPairsMoveCharacter')
-  let g:AutoPairsMoveCharacter = "()[]{}\"'"
-end
-
 if !exists('g:AutoPairsShortcutJump')
   let g:AutoPairsShortcutJump = '<M-n>'
 endif
@@ -63,12 +54,6 @@ if !exists('g:AutoPairsFlyMode')
   let g:AutoPairsFlyMode = 0
 endif
 
-" When skipping the closed pair, look at the current and
-" next line as well.
-if !exists('g:AutoPairsMultilineClose')
-  let g:AutoPairsMultilineClose = 1
-endif
-
 " Work with Fly Mode, insert pair where jumped
 if !exists('g:AutoPairsShortcutBackInsert')
   let g:AutoPairsShortcutBackInsert = '<M-b>'
@@ -77,18 +62,6 @@ endif
 if !exists('g:AutoPairsSmartQuotes')
   let g:AutoPairsSmartQuotes = 1
 endif
-
-" 7.4.849 support <C-G>U to avoid breaking '.'
-" Issue talk: https://github.com/jiangmiao/auto-pairs/issues/3
-" Vim note: https://github.com/vim/vim/releases/tag/v7.4.849
-if v:version > 704 || v:version == 704 && has("patch849")
-  let s:Go = "\<C-G>U"
-else
-  let s:Go = ""
-endif
-
-let s:Left = s:Go."\<LEFT>"
-let s:Right = s:Go."\<RIGHT>"
 
 
 " Will auto generated {']' => '[', ..., '}' => '{'}in initialize.
@@ -126,24 +99,20 @@ function! AutoPairsInsert(key)
 
     " Skip the character if current character is the same as input
     if current_char == a:key
-      return s:Right
+      return "\<Right>"
     end
 
     if !g:AutoPairsFlyMode
       " Skip the character if next character is space
       if current_char == ' ' && next_char == a:key
-        return s:Right.s:Right
+        return "\<Right>\<Right>"
       end
 
       " Skip the character if closed pair is next character
       if current_char == ''
-        if g:AutoPairsMultilineClose
-          let next_lineno = line('.')+1
-          let next_line = getline(nextnonblank(next_lineno))
-          let next_char = matchstr(next_line, '\s*\zs.')
-        else
-          let next_char = matchstr(line, '\s*\zs.')
-        end
+        let next_lineno = line('.')+1
+        let next_line = getline(nextnonblank(next_lineno))
+        let next_char = matchstr(next_line, '\s*\zs.')
         if next_char == a:key
           return "\<ESC>e^a"
         endif
@@ -152,12 +121,7 @@ function! AutoPairsInsert(key)
 
     " Fly Mode, and the key is closed-pairs, search closed-pair and jump
     if g:AutoPairsFlyMode && has_key(b:AutoPairsClosedPairs, a:key)
-      let n = stridx(after, a:key)
-      if n != -1
-        return repeat(s:Right, n+1)
-      end
       if search(a:key, 'W')
-        " force break the '.' when jump to different line
         return "\<Right>"
       endif
     endif
@@ -170,7 +134,7 @@ function! AutoPairsInsert(key)
   let close = b:AutoPairs[open]
 
   if current_char == close && open == close
-    return s:Right
+    return "\<Right>"
   end
 
   " Ignore auto close ' if follows a word
@@ -185,7 +149,7 @@ function! AutoPairsInsert(key)
     let pprev_char = line[col('.')-3]
     if pprev_char == open && prev_char == open
       " Double pair found
-      return repeat(a:key, 4) . repeat(s:Left, 3)
+      return repeat(a:key, 4) . repeat("\<LEFT>", 3)
     end
   end
 
@@ -220,7 +184,7 @@ function! AutoPairsInsert(key)
     endif
   endif
 
-  return open.close.s:Left
+  return open.close."\<Left>"
 endfunction
 
 function! AutoPairsDelete()
@@ -265,7 +229,7 @@ function! AutoPairsDelete()
   end
 
 
-  if has_key(b:AutoPairs, prev_char)
+  if has_key(b:AutoPairs, prev_char) 
     let close = b:AutoPairs[prev_char]
     if match(line,'^\s*'.close, col('.')-1) != -1
       " Delete (|___)
@@ -325,7 +289,7 @@ function! AutoPairsFastWrap()
   let next_char = line[col('.')]
   let open_pair_pattern = '\v[({\[''"]'
   let at_end = col('.') >= col('$') - 1
-  normal! x
+  normal x
   " Skip blank
   if next_char =~ '\v\s' || at_end
     call search('\v\S', 'W')
@@ -344,10 +308,10 @@ function! AutoPairsFastWrap()
     else
       call search(s:FormatChunk(followed_open_pair, followed_close_pair), 'We')
     end
-    return s:Right.inputed_close_pair.s:Left
+    return "\<RIGHT>".inputed_close_pair."\<LEFT>"
   else
-    normal! he
-    return s:Right.current_char.s:Left
+    normal he
+    return "\<RIGHT>".current_char."\<LEFT>"
   end
 endfunction
 
@@ -360,7 +324,6 @@ function! AutoPairsMap(key)
   let escaped_key = substitute(key, "'", "''", 'g')
   " use expr will cause search() doesn't work
   execute 'inoremap <buffer> <silent> '.key." <C-R>=AutoPairsInsert('".escaped_key."')<CR>"
-
 endfunction
 
 function! AutoPairsToggle()
@@ -374,12 +337,6 @@ function! AutoPairsToggle()
   return ''
 endfunction
 
-function! AutoPairsMoveCharacter(key)
-  let c = getline(".")[col(".")-1]
-  let escaped_key = substitute(a:key, "'", "''", 'g')
-  return "\<DEL>\<ESC>:call search("."'".escaped_key."'".")\<CR>a".c."\<LEFT>"
-endfunction
-
 function! AutoPairsReturn()
   if b:autopairs_enabled == 0
     return ''
@@ -391,23 +348,25 @@ function! AutoPairsReturn()
   let cur_char = line[col('.')-1]
   if has_key(b:AutoPairs, prev_char) && b:AutoPairs[prev_char] == cur_char
     if g:AutoPairsCenterLine && winline() * 3 >= winheight(0) * 2
-      " Recenter before adding new line to avoid replacing line content
-      let cmd = "zz"
+      " Use \<BS> instead of \<ESC>cl will cause the placeholder deleted
+      " incorrect. because <C-O>zz won't leave Normal mode.
+      " Use \<DEL> is a bit wierd. the character before cursor need to be deleted.
+      let cmd = " \<C-O>zz\<ESC>cl"
     end
 
     " If equalprg has been set, then avoid call =
     " https://github.com/jiangmiao/auto-pairs/issues/24
     if &equalprg != ''
-      return "\<ESC>".cmd."O"
+      return "\<ESC>O".cmd
     endif
 
     " conflict with javascript and coffee
     " javascript   need   indent new line
     " coffeescript forbid indent new line
     if &filetype == 'coffeescript' || &filetype == 'coffee'
-      return "\<ESC>".cmd."k==o"
+      return "\<ESC>k==o".cmd
     else
-      return "\<ESC>".cmd."=ko"
+      return "\<ESC>=ko".cmd
     endif
   end
   return ''
@@ -419,7 +378,7 @@ function! AutoPairsSpace()
   let cmd = ''
   let cur_char =line[col('.')-1]
   if has_key(g:AutoPairsParens, prev_char) && g:AutoPairsParens[prev_char] == cur_char
-    let cmd = "\<SPACE>".s:Left
+    let cmd = "\<SPACE>\<LEFT>"
   endif
   return "\<SPACE>".cmd
 endfunction
@@ -436,17 +395,11 @@ endfunction
 
 function! AutoPairsInit()
   let b:autopairs_loaded  = 1
-  if !exists('b:autopairs_enabled')
-    let b:autopairs_enabled = 1
-  end
+  let b:autopairs_enabled = 1
   let b:AutoPairsClosedPairs = {}
 
   if !exists('b:AutoPairs')
     let b:AutoPairs = g:AutoPairs
-  end
-
-  if !exists('b:AutoPairsMoveCharacter')
-    let b:AutoPairsMoveCharacter = g:AutoPairsMoveCharacter
   end
 
   " buffer level map pairs keys
@@ -458,25 +411,17 @@ function! AutoPairsInit()
     let b:AutoPairsClosedPairs[close] = open
   endfor
 
-  for key in split(b:AutoPairsMoveCharacter, '\s*')
-    let escaped_key = substitute(key, "'", "''", 'g')
-    execute 'inoremap <silent> <buffer> <M-'.key."> <C-R>=AutoPairsMoveCharacter('".escaped_key."')<CR>"
-  endfor
-
   " Still use <buffer> level mapping for <BS> <SPACE>
   if g:AutoPairsMapBS
     " Use <C-R> instead of <expr> for issue #14 sometimes press BS output strange words
     execute 'inoremap <buffer> <silent> <BS> <C-R>=AutoPairsDelete()<CR>'
+    execute 'inoremap <buffer> <silent> <C-H> <C-R>=AutoPairsDelete()<CR>'
   end
-
-  if g:AutoPairsMapCh
-    execute 'inoremap <buffer> <silent> <C-h> <C-R>=AutoPairsDelete()<CR>'
-  endif
 
   if g:AutoPairsMapSpace
     " Try to respect abbreviations on a <SPACE>
     let do_abbrev = ""
-    if v:version == 703 && has("patch489") || v:version > 703
+    if v:version >= 703 && has("patch489")
       let do_abbrev = "<C-]>"
     endif
     execute 'inoremap <buffer> <silent> <SPACE> '.do_abbrev.'<C-R>=AutoPairsSpace()<CR>'
@@ -522,13 +467,13 @@ function! AutoPairsTryInit()
   " supertab doesn't support <SID>AutoPairsReturn
   " when use <SID>AutoPairsReturn  will cause Duplicated <CR>
   "
-  " and when load after vim-endwise will cause unexpected endwise inserted.
+  " and when load after vim-endwise will cause unexpected endwise inserted. 
   " so always load AutoPairs at last
-
+  
   " Buffer level keys mapping
   " comptible with other plugin
   if g:AutoPairsMapCR
-    if v:version == 703 && has('patch32') || v:version > 703
+    if v:version >= 703 && has('patch32')
       " VIM 7.3 supports advancer maparg which could get <expr> info
       " then auto-pairs could remap <CR> in any case.
       let info = maparg('<CR>', 'i', 0, 1)
@@ -553,10 +498,7 @@ function! AutoPairsTryInit()
       else
         let old_cr = s:ExpandMap(old_cr)
         " old_cr contain (, I guess the old cr is in expr mode
-        let is_expr = old_cr =~ '\V(' && toupper(old_cr) !~ '\V<C-R>'
-
-        " The old_cr start with " it must be in expr mode
-        let is_expr = is_expr || old_cr =~ '\v^"'
+        let is_expr = old_cr  =~ '\V(' && toupper(old_cr) !~ '\V<C-R>'
         let wrapper_name = '<SID>AutoPairsOldCRWrapper'
       end
     end

@@ -1,12 +1,12 @@
 body {
     width: 980px;
     margin: 20px auto;
-    //color: #333333;
-    //border: 1px solid #CCCCCC;
-    //border-radius: 6px;
-    //box-shadow: 0 1px 6px #aaaaaa;
-    //box-sizing: border-box;
-    //background: #fafafa;
+    color: #333333;
+    border: 1px solid #CCCCCC;
+    border-radius: 6px;
+    box-shadow: 0 1px 6px #aaaaaa;
+    box-sizing: border-box;
+    background: #fafafa;
 }
 
 .markdown-content > a:first-child ~ *:nth-child(2) {
@@ -33,9 +33,9 @@ body {
   word-wrap: break-word;
   padding: 45px;
   background: #fff;
-  //border: 1px solid #ddd;
-  //-webkit-border-radius: 6px;
-  //border-radius: 6px;
+  border: 1px solid #ddd;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
 }
 .markdown-content > *:first-child {
   margin-top: 0 !important;

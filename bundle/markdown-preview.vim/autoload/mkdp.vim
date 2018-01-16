@@ -96,7 +96,7 @@ endfu
 fun! s:serverStart() abort "function for starting the server
     let g:mkdp_port = g:mkdp_port + localtime()[7:10]
     if s:mkdp_is_windows()
-        exec "silent !start /b python " . s:path_to_server . ' ' . g:mkdp_port
+        exec "silent !start /b python " . '"' . s:path_to_server . '" ' . g:mkdp_port
     else
         call system("python " . s:path_to_server . " " . g:mkdp_port . " &>/dev/null &")
     endif
@@ -107,7 +107,14 @@ fun! s:serverClose() abort "function for close the server
 endfu
 
 fun! s:browserStart() abort "function for opening the browser
-    let g:mkdp_cwd = expand('%:p:h')
+    let s:mathjax_vim_path = ''
+
+    " whether mathjax support
+    if exists('g:mathjax_vim_path')
+        let s:mathjax_vim_path = g:mathjax_vim_path
+    endif
+
+    let g:mkdp_cwd = expand('%:p') . '&' . s:mathjax_vim_path
 
     " py2/py3 different resolve for str
     if g:mkdp_py_version == 2

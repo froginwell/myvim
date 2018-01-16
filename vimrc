@@ -2,10 +2,10 @@ set nocompatible
 set encoding=utf-8
 set fileencoding=utf-8
 set fileencodings=utf-8,gb18030,utf-16,big5
-" set tabstop=4
-" set softtabstop=4
-" set shiftwidth=4
-" set expandtab
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+set expandtab
 set number
 set hlsearch
 set incsearch
@@ -15,9 +15,14 @@ set ruler
 set hidden
 set cursorline
 set colorcolumn=79
+set backspace=indent,eol,start
+set clipboard+=unnamed
+
 syntax enable
-set background=dark
+" set background=dark
+" let g:solarized_termcolors=256
 colorscheme solarized
+
 " 基于语法进行代码折叠 za 打开或关闭 zM 关闭所有折叠 zR 打开所有折叠
 set foldmethod=syntax
 " 启动 vim 时不要自动折叠代码
@@ -55,7 +60,8 @@ endfunction
 filetype off
 set rtp+=~/.vim/bundle/Vundle.vim/
 call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
+Plugin 'gmarik/Vundle.vim'
+Plugin 'Valloric/YouCompleteMe'
 Plugin 'fholgado/minibufexpl.vim'
 Plugin 'scrooloose/nerdtree'
 Plugin 'scrooloose/nerdcommenter'
@@ -76,8 +82,8 @@ filetype plugin indent on
 
 
 " nerdtree
-nnoremap <F2> :NERDTreeToggle<CR>
-let NERDTreeWinSize = 25
+nnoremap <C-n> :NERDTreeToggle<CR>
+let NERDTreeWinSize = 20
 
 
 " nerdcommenter
@@ -87,8 +93,8 @@ let g:NERDDefaultAlign = 'left'
 
 
 " tagbar
-nnoremap <F3> :TagbarToggle<CR>
-let g:tagbar_width = 25
+nnoremap <C-t> :TagbarToggle<CR>
+let g:tagbar_width = 20
 
 
 " YouCompleteMe
@@ -126,21 +132,21 @@ let g:user_emmet_install_global = 0
 autocmd FileType html,css EmmetInstall
 
 
-" closetag.vim
-let g:closetag_filename = "*.html,*.xhtml,*.phtml,*.xml"
-
-" markdown-preview
-let g:mkdp_auto_start = 1
-let g:mkdp_refresh_slow = 1
-
-" indent
-" 之所以在这里配置，是因为在上面配置的话好像会被某些插件覆盖，导致无法生效，
-" 这是找到的一个可以解决这个问题的方法，可能还会有更好的方法。
-autocmd Filetype * setlocal ts=4 sts=4 sw=4 et
-autocmd FileType html,css setlocal ts=2 sts=2 sw=2 et
-
-" 折叠
-autocmd FileType python setlocal foldmethod=indent makeprg=python\ %
-
-" 格式化
-autocmd BufWrite *.py :0,$!yapf --style google
+" " closetag.vim
+" let g:closetag_filename = "*.html,*.xhtml,*.phtml,*.xml"
+" 
+" " markdown-preview
+" let g:mkdp_auto_start = 1
+" let g:mkdp_refresh_slow = 1
+" 
+" " indent
+" " 之所以在这里配置，是因为在上面配置的话好像会被某些插件覆盖，导致无法生效，
+" " 这是找到的一个可以解决这个问题的方法，可能还会有更好的方法。
+" autocmd Filetype * setlocal ts=4 sts=4 sw=4 et
+" autocmd FileType html,css setlocal ts=2 sts=2 sw=2 et
+" 
+" " 折叠
+" autocmd FileType python setlocal foldmethod=indent makeprg=python\ %
+" 
+" " 格式化
+" autocmd BufWrite *.py :0,$!yapf --style google
