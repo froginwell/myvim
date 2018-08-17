@@ -19,9 +19,6 @@ set backspace=indent,eol,start
 set clipboard+=unnamed
 
 syntax enable
-" set background=dark
-" let g:solarized_termcolors=256
-colorscheme solarized
 
 " 基于语法进行代码折叠 za 打开或关闭 zM 关闭所有折叠 zR 打开所有折叠
 set foldmethod=syntax
@@ -57,6 +54,10 @@ function! s:VSetSearch()
     let @s = temp
 endfunction
 
+" set background=dark
+" let g:solarized_termcolors=256
+colorscheme solarized
+
 filetype off
 set rtp+=~/.vim/bundle/Vundle.vim/
 call vundle#begin()
@@ -77,6 +78,7 @@ Plugin 'mattn/emmet-vim'
 Plugin 'alvan/vim-closetag'
 Plugin 'iamcco/markdown-preview.vim'
 Plugin 'auto-pairs'
+Plugin 'nvie/vim-flake8'
 call vundle#end()
 filetype plugin indent on
 
@@ -134,19 +136,20 @@ autocmd FileType html,css EmmetInstall
 
 " " closetag.vim
 " let g:closetag_filename = "*.html,*.xhtml,*.phtml,*.xml"
-" 
-" " markdown-preview
-" let g:mkdp_auto_start = 1
-" let g:mkdp_refresh_slow = 1
-" 
+
+" markdown-preview
+let g:mkdp_path_to_chrome = "/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome"
+let g:mkdp_auto_start = 1
+let g:mkdp_refresh_slow = 1
+
 " " indent
 " " 之所以在这里配置，是因为在上面配置的话好像会被某些插件覆盖，导致无法生效，
 " " 这是找到的一个可以解决这个问题的方法，可能还会有更好的方法。
 " autocmd Filetype * setlocal ts=4 sts=4 sw=4 et
 " autocmd FileType html,css setlocal ts=2 sts=2 sw=2 et
 " 
-" " 折叠
-" autocmd FileType python setlocal foldmethod=indent makeprg=python\ %
-" 
+" 折叠
+autocmd FileType python setlocal foldmethod=indent makeprg=python\ %
+
 " " 格式化
 " autocmd BufWrite *.py :0,$!yapf --style google
